@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_marginTop="60dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_picture"
+            android:layout_width="80dp"
+            android:layout_height="120dp"
+            android:background="@color/purple_200"
+            android:gravity="center"
+            android:text="拍照"/>
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_preview_video"
+            android:layout_width="80dp"
+            android:layout_height="120dp"
+            android:layout_marginStart="10dp"
+            android:background="@color/purple_200"
+            android:gravity="center"
+            android:text="视频预览"/>
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_video"
+            android:layout_width="80dp"
+            android:layout_height="120dp"
+            android:layout_marginHorizontal="10dp"
+            android:background="@color/purple_200"
+            android:gravity="center"
+            android:text="视频拍摄"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_stop"
+            android:layout_width="80dp"
+            android:layout_height="120dp"
+            android:background="@color/purple_200"
+            android:gravity="center"
+            android:text="停止"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+    <FrameLayout
+        android:id="@+id/fc_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+
+
+    </FrameLayout>
+
+</androidx.appcompat.widget.LinearLayoutCompat>
