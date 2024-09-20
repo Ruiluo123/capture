@@ -4,53 +4,85 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_marginTop="60dp"
-        android:layout_width="match_parent"
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/sc_themes"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp">
+        android:padding="10dp"
+        android:text="深色主题" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_picture"
-            android:layout_width="80dp"
-            android:layout_height="120dp"
-            android:background="@color/purple_200"
-            android:gravity="center"
-            android:text="拍照"/>
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_preview_video"
-            android:layout_width="80dp"
-            android:layout_height="120dp"
-            android:layout_marginStart="10dp"
-            android:background="@color/purple_200"
-            android:gravity="center"
-            android:text="视频预览"/>
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_video"
-            android:layout_width="80dp"
-            android:layout_height="120dp"
-            android:layout_marginHorizontal="10dp"
-            android:background="@color/purple_200"
-            android:gravity="center"
-            android:text="视频拍摄"/>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:layout_marginBottom="10dp">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_stop"
-            android:layout_width="80dp"
-            android:layout_height="120dp"
-            android:background="@color/purple_200"
-            android:gravity="center"
-            android:text="停止"/>
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_preview_camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@color/purple_200"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="相机预览"
+                android:textColor="@color/white" />
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/purple_200"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="拍照"
+                android:textColor="@color/white" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_preview_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:background="@color/purple_200"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="视频预览"
+                android:textColor="@color/white" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:background="@color/purple_200"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="视频拍摄"
+                android:textColor="@color/white" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_stop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/purple_200"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="停止"
+                android:textColor="@color/white" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.core.widget.NestedScrollView>
+
 
 
 
     <FrameLayout
         android:id="@+id/fc_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
 
         <androidx.camera.view.PreviewView
             android:id="@+id/previewView"

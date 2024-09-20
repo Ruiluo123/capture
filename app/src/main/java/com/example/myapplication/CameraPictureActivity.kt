@@ -12,6 +12,7 @@ import android.view.Surface
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -36,19 +37,19 @@ import java.util.concurrent.Executors
 class CameraPictureActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraPictureBinding
 
-    private lateinit var cameraProviderFuture : ListenableFuture<ProcessCameraProvider>
-    private  var   imageCapture: ImageCapture? = null
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private var imageCapture: ImageCapture? = null
     private var videoCapture: VideoCapture<Recorder>? = null
-    private lateinit var cameraExecutor : ExecutorService
-    private  var recording : Recording? = null
-
+    private lateinit var cameraExecutor: ExecutorService
+    private var recording: Recording? = null
+    private var isDarkMode = false
 
 
     private val tag = "CameraPictureActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding =  ActivityCameraPictureBinding.inflate(layoutInflater)
+        binding = ActivityCameraPictureBinding.inflate(layoutInflater)
         setContentView(binding.root)
         cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -62,31 +63,72 @@ class CameraPictureActivity : AppCompatActivity() {
         videoCapture = VideoCapture.withOutput(recorder)
 
         //初始化详相机
-        if (setCameraPermission()){
-            startCamera()
+        binding.tvPreviewCamera.setOnClickListener {
+            if (setCameraPermission()) {
+                startCamera()
+            }
         }
+
         //cameraX相机拍照功能实现 版本 compieOptions 版本 3.5 以上
 
         binding.tvPicture.setOnClickListener {
 
             Log.e(tag, "拍照功能-----${setCameraPermission()}")
-            if (setCameraPermission()){
+            if (setCameraPermission()) {
                 takePhoto()
             }
         }
         binding.tvPreviewVideo.setOnClickListener {
 
             Log.e(tag, "视频预览-----${setCameraPermission()}")
-            if (setCameraPermission()){
+            if (setCameraPermission()) {
                 startCameraVideo()
             }
         }
         binding.tvVideo.setOnClickListener {
 
             Log.e(tag, "拍视频功能-----${setCameraPermission()}")
-            if (setCameraPermission()){
+            if (setCameraPermission()) {
                 captureVideo()
             }
+        }
+        binding.tvStop.setOnClickListener {
+            stopPreview()
+        }
+        initTheme()
+
+    }
+
+    /**
+     * 设置主题颜色
+     *
+     * */
+    private fun initTheme() {
+        // 切换主题
+        isDarkMode = ShareUtil.getBoolean(Constant.sp_themes, this)
+        binding.scThemes.setChecked(isDarkMode)
+        setBaseTheme()
+        switchTheme()
+    }
+
+    /**
+     * 切换主题
+     *
+     * */
+    private fun switchTheme() {
+        binding.scThemes.setOnCheckedChangeListener { _, isChecked ->
+            isDarkMode = isChecked
+            setBaseTheme()
+            ShareUtil.putBoolean(Constant.sp_themes, isChecked, this)
+
+        }
+    }
+
+    private fun setBaseTheme() {
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
 
@@ -123,21 +165,24 @@ class CameraPictureActivity : AppCompatActivity() {
         recording = videoCapture.output
             .prepareRecording(this, mediaStoreOutputOptions)
             .apply {
-                if (PermissionChecker.checkSelfPermission(this@CameraPictureActivity,
-                        Manifest.permission.RECORD_AUDIO) ==
-                    PermissionChecker.PERMISSION_GRANTED)
-                {
+                if (PermissionChecker.checkSelfPermission(
+                        this@CameraPictureActivity,
+                        Manifest.permission.RECORD_AUDIO
+                    ) ==
+                    PermissionChecker.PERMISSION_GRANTED
+                ) {
                     withAudioEnabled()
                 }
             }
             .start(ContextCompat.getMainExecutor(this)) { recordEvent ->
-                when(recordEvent) {
+                when (recordEvent) {
                     is VideoRecordEvent.Start -> {
                         binding.tvVideo.apply {
                             text = getString(R.string.stop_capture)
                             isEnabled = true
                         }
                     }
+
                     is VideoRecordEvent.Finalize -> {
                         if (!recordEvent.hasError()) {
                             val msg = "Video capture succeeded: " +
@@ -148,8 +193,10 @@ class CameraPictureActivity : AppCompatActivity() {
                         } else {
                             recording?.close()
                             recording = null
-                            Log.e(tag, "Video capture ends with error: " +
-                                    "${recordEvent.error}")
+                            Log.e(
+                                tag, "Video capture ends with error: " +
+                                        "${recordEvent.error}"
+                            )
                         }
                         binding.tvVideo.apply {
                             text = getString(R.string.start_capture)
@@ -183,9 +230,10 @@ class CameraPictureActivity : AppCompatActivity() {
 
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector,imageCapture, preview)
+                    this, cameraSelector, imageCapture, preview
+                )
 
-            } catch(exc: Exception) {
+            } catch (exc: Exception) {
                 Log.e(tag, "Use case binding failed", exc)
             }
 
@@ -214,9 +262,10 @@ class CameraPictureActivity : AppCompatActivity() {
 
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview,videoCapture)
+                    this, cameraSelector, preview, videoCapture
+                )
 
-            } catch(exc: Exception) {
+            } catch (exc: Exception) {
                 Log.e(tag, "Use case binding failed", exc)
             }
 
@@ -236,16 +285,18 @@ class CameraPictureActivity : AppCompatActivity() {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image")
             }
         }
 
         // Create output options object which contains file + metadata
         val outputOptions = ImageCapture.OutputFileOptions
-            .Builder(contentResolver,
+            .Builder(
+                contentResolver,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues)
+                contentValues
+            )
             .build()
 
         // Set up image capture listener, which is triggered after photo has
@@ -259,7 +310,7 @@ class CameraPictureActivity : AppCompatActivity() {
                 }
 
                 override fun
-                        onImageSaved(output: ImageCapture.OutputFileResults){
+                        onImageSaved(output: ImageCapture.OutputFileResults) {
                     val msg = "Photo capture succeeded: ${output.savedUri}"
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(tag, msg)
@@ -272,27 +323,30 @@ class CameraPictureActivity : AppCompatActivity() {
     private val REQUEST_CODE_PERMISSIONS = 10001
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults:
-        IntArray) {
+        IntArray
+    ) {
         Log.e(tag, "权限0000-----***$requestCode")
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             Log.e(tag, "权限111111-----$requestCode---${allPermissionsGranted(grantResults)}")
             if (allPermissionsGranted(grantResults)) {
                 startCamera()
             } else {
-                Toast.makeText(this,
+                Toast.makeText(
+                    this,
                     "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    private fun allPermissionsGranted(grantResults: IntArray):Boolean{
+    private fun allPermissionsGranted(grantResults: IntArray): Boolean {
         return grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun setCameraPermission():Boolean {
+    private fun setCameraPermission(): Boolean {
         var hasPermission = false
         val listPermission =
             arrayOf(
@@ -301,43 +355,51 @@ class CameraPictureActivity : AppCompatActivity() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
 
-            for (permission in listPermission) {
-                if (checkPermission(permission)) {
-                    Log.e(tag, "弹窗-----${Build.VERSION_CODES.TIRAMISU}")
-                    AlertDialog.Builder(this)
-                        .setTitle(title)
-                        .setMessage("使用您的音频、相机、写入权限，可以拍照和视频录制")
-                        .setPositiveButton("确定") { dialog, _ ->
-                            // 请求权限
+        for (permission in listPermission) {
+            if (checkPermission(permission)) {
+                Log.e(tag, "弹窗-----${Build.VERSION_CODES.TIRAMISU}")
+                AlertDialog.Builder(this)
+                    .setTitle(title)
+                    .setMessage("使用您的音频、相机、写入权限，可以拍照和视频录制")
+                    .setPositiveButton("确定") { dialog, _ ->
+                        // 请求权限
 
-                            Log.e(tag, "弹窗-----确定----")
-                            requestPermission(listPermission,REQUEST_CODE_PERMISSIONS)
-                            dialog.dismiss()
-                        }
-                        .create()
-                        .show()
+                        Log.e(tag, "弹窗-----确定----")
+                        requestPermission(listPermission, REQUEST_CODE_PERMISSIONS)
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
 
-                    return hasPermission
-                }else {
-                    hasPermission = true
-                    return hasPermission
-                }
+                return hasPermission
+            } else {
+                hasPermission = true
+                return hasPermission
+            }
         }
         return hasPermission
     }
 
-    private fun requestPermission(listPermission:Array<String>,requestCode:Int){
+    private fun requestPermission(listPermission: Array<String>, requestCode: Int) {
         ActivityCompat.requestPermissions(
             this,
             listPermission,
             requestCode
         )
     }
+
     private fun checkPermission(permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
             this,
             permission
         ) != PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun stopPreview() {
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll() // 释放所有资源
+        }, ContextCompat.getMainExecutor(this))
     }
 
     override fun onDestroy() {
